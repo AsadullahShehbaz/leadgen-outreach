@@ -1,0 +1,36 @@
+fastapi[standard]
+python-multipart
+
+# --- Database / ORM / migrations ---
+sqlmodel
+sqlalchemy[asyncio]
+asyncpg
+alembic
+
+# --- Queue / cache ---
+arq
+redis
+
+# --- Config / validation ---
+pydantic-settings
+
+# --- AI agents ---
+langgraph
+openai
+httpx
+
+# --- Auth / crypto ---
+pyjwt
+passlib[bcrypt]
+cryptography
+
+# --- Mail (SMTP/IMAP) ---
+aiosmtplib
+aioimaplib
+
+# --- Website crawler (lead source, module 9) ---
+beautifulsoup4
+
+# --- Dev / tests ---
+pytest
+pytest-asyncio
