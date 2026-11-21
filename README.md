@@ -2,104 +2,118 @@
 
 **Automated B2B cold outreach that finds prospects, writes personalized emails, and protects your reputation — with a human always in control.**
 
-Every client gets a private deployment on their own server, with their own email accounts, their own data provider, and their own AI key. No shared data. No shared credentials. No telemetry.
+LeadGen automates the B2B outreach workflow, from prospect discovery and verification to AI-powered personalization, email delivery, and performance analytics.
 
 ---
 
-## The problem
+## The Problem
 
-Cold email works, but doing it by hand breaks down fast:
+Cold email works, but managing it manually becomes difficult at scale:
 
 - Finding hundreds of relevant prospects takes hours.
-- Half the addresses are dead — and sending to them damages your domain.
-- Writing 500 personal-sounding emails is impossible manually.
-- Sending too fast gets you marked as spam.
-- One email to someone who said "stop" is a legal problem.
-- Nobody knows which messages actually won meetings.
+- Invalid email addresses damage domain reputation.
+- Writing personalized emails manually is time-consuming.
+- Sending too quickly increases spam risks.
+- Contacting someone who unsubscribed creates compliance problems.
+- Tracking which campaigns generate actual business results is difficult.
 
-LeadGen runs that entire process safely, and stops instantly when a human says stop.
+LeadGen automates this process while keeping humans in control.
 
-## How it works
+## How It Works
 
-Every prospect moves down one assembly line:
+Every prospect moves through the following workflow:
 
-1. **Find** — import a CSV you own, crawl public company websites, or connect Apollo/Apify with your own account.
-2. **Score** — measure each person against your ideal customer profile.
-3. **Verify** — syntax, mail servers, disposable and role-address filters, then a paid verification API. Only valid addresses move forward; risky ones at a capped share.
-4. **Personalize** — AI researches the company and drafts the email. A separate critic checks every factual claim and rejects anything invented.
-5. **Approve** — you review and approve drafts. Approval is mandatory for the first 50 emails.
-6. **Send** — every email passes a gauntlet of checks: kill switch, suppression, license, send window, and daily mailbox cap. Once a minute.
-7. **Watch** — bounces suppress the address; replies stop the sequence; "unsubscribe" is permanent; out-of-office pauses until the person returns.
-8. **Learn** — A/B tests, queue reordering toward leads that look like past winners, and a weekly report with cost per positive reply.
+1. **Find** — Import CSV files, discover prospects through public company websites, or integrate with Apollo and Apify.
+2. **Score** — Evaluate prospects against your Ideal Customer Profile (ICP).
+3. **Verify** — Check email syntax, mail servers, disposable addresses, role-based addresses, and verification API results.
+4. **Personalize** — AI researches companies and generates personalized email drafts. A separate critic checks factual claims.
+5. **Approve** — Review and approve generated drafts before sending. Approval is mandatory for the first 50 emails.
+6. **Send** — Emails pass through safety checks, suppression rules, sending windows, and daily mailbox limits.
+7. **Watch** — Process bounces, replies, unsubscribes, and out-of-office responses automatically.
+8. **Learn** — Use A/B testing, campaign optimization, and weekly performance reports to improve results.
 
-## Safety is the product
+## Safety Is the Product
 
-| Protection | What it does |
-| --- | --- |
-| Verified before contact | Only valid addresses are emailed. Dead and role addresses never reach the send queue. |
-| Permanent suppression | Unsubscribes, bounces, and complaints are suppressed forever and re-checked before every single send. |
-| Human approval | Drafts wait for a human by default and are mandatory for the first 50 emails. |
-| Deliverability gates | No sending until SPF, DKIM, and DMARC pass. Warm-up ramps and a 30–50 emails per mailbox per day target. |
-| Automatic brakes | A spike in hard bounces or spam complaints pauses the mailbox before damage spreads. |
-| Honest personalization | Invented facts are rejected by a critic step, so no embarrassing "I loved your funding round" emails. |
-| Built-in compliance | Sender identity, postal address, and opt-out in every footer; a lawful-basis record per lead; Germany and Canada blocked by default without one. |
-| Spend protection | Daily caps for AI, verification, and source credits — no surprise bills. |
-| License that never harms compliance | An expired license can pause new campaigns, but never unsubscribes, suppression, or bounce handling. |
+| Protection | What It Does |
+|---|---|
+| Email verification | Filters invalid, disposable, and risky email addresses. |
+| Permanent suppression | Prevents contacting unsubscribed, bounced, or complaining recipients again. |
+| Human approval | Keeps humans involved in reviewing and approving email drafts. |
+| Deliverability gates | Requires SPF, DKIM, and DMARC checks before sending. |
+| Sending limits | Controls daily sending volume and gradually ramps up campaigns. |
+| Automatic brakes | Pauses sending when hard bounces or spam complaints increase. |
+| Honest personalization | Rejects unsupported or fabricated claims about prospects. |
+| Compliance controls | Supports sender identification, postal addresses, opt-out links, and lawful-basis records. |
+| Spend protection | Provides daily usage limits for AI, verification, and prospect-source credits. |
+| Independent safety controls | Keeps unsubscribe and bounce handling operational even when other application services are unavailable. |
 
-## What LeadGen never does
+## What LeadGen Never Does
 
-- Never emails someone who unsubscribed or bounced.
+- Never emails someone who has unsubscribed or bounced.
 - Never replies to a prospect automatically.
 - Never uses open-tracking pixels.
 - Never invents personal facts about a prospect.
-- Never puts one client's data or credentials inside another client's deployment.
-- Never lets a billing or license problem disable unsubscribes or bounce handling.
+- Never bypasses mandatory safety checks.
+- Never allows sending limits to be ignored.
+- Never disables unsubscribe or bounce handling because of unrelated application failures.
 
-## Results you can measure
+## Results You Can Measure
 
-LeadGen tracks what matters to a business: **positive replies, meetings, customers won per 1,000 leads, and cost per positive reply.** Not opens.
+LeadGen focuses on meaningful business metrics:
 
-## Sold as a private copy, not a shared website
+- Positive replies.
+- Meetings generated.
+- Customers won per 1,000 leads.
+- Cost per positive reply.
+- Campaign performance.
+- Email bounce and complaint rates.
 
-| Delivery | Who runs it |
-| --- | --- |
-| Self-host | The client's own IT team |
-| Done-for-you install | Installed on the client's server, then handed over |
-| Managed dedicated instance | One private instance hosted for that client |
+The focus is on actual business outcomes rather than email opens.
 
-The client is always the legal sender, owns their accounts, and keeps their data. The seller keeps near-zero running costs.
+## Who Is It For?
 
-## Who it is for
+LeadGen is designed for:
 
-B2B teams, agencies, and small businesses with a clear offer — and the discipline to follow deliverability best practices. Cold email is not a magic button: results depend on domain reputation, list quality, and the offer itself.
+- B2B sales teams.
+- Marketing agencies.
+- Lead generation agencies.
+- Startups and small businesses.
+- Businesses looking to automate prospect research and cold email campaigns.
 
-## Under the hood
+It works best for businesses with a clear offer, relevant prospect lists, and a commitment to email deliverability best practices.
 
-- **FastAPI + Postgres** — API and permanent memory.
-- **Redis + ARQ** — job queue and atomic daily send caps.
-- **LangGraph + any OpenAI-compatible LLM** — research, drafting, and the claim-checking critic.
-- **SMTP/IMAP** — works with any email provider.
-- **React** — the dashboard.
-- **Docker Compose + Caddy** — one-command install and automatic HTTPS.
+## Under the Hood
 
-Tests use fake providers and never touch the network or send a real email.
+| Technology | Purpose |
+|---|---|
+| **FastAPI + PostgreSQL** | Backend API and persistent data storage. |
+| **Redis + ARQ** | Background job processing and atomic daily sending limits. |
+| **LangGraph + OpenAI-compatible LLMs** | AI-powered research, email generation, and claim verification. |
+| **SMTP / IMAP** | Email sending and inbox monitoring. |
+| **React** | Frontend dashboard and campaign management. |
+| **Docker Compose + Caddy** | Application containerization and automatic HTTPS. |
+| **Alembic** | Database schema migrations. |
 
-## Project status
+Tests use mock providers and do not send real emails or make external network requests.
 
-LeadGen is in active development.
+## Project Status
 
-- **Done:** environment, complete data layer — 16 tables, an Alembic migration, and passing unit tests — plus the enrollment state machine with tests for every allowed and illegal transition.
-- **Next:** the rest of the safety-critical core — limiter, suppression, and the send engine.
-- **Later:** inbox worker, authentication and setup wizard, lead sources and verification, AI agent, licensing, packaging, dashboard, and optimizer.
+LeadGen is currently in active development.
 
-See [PROGRESS.md](PROGRESS.md) for the live module tracker.
+- **Completed:** Environment setup, complete data layer with 16 database tables, Alembic migration, passing unit tests, and the enrollment state machine with tests for every allowed and illegal transition.
+- **Next:** The rest of the safety-critical core, including the rate limiter, suppression system, and email sending engine.
+- **Planned:** Inbox worker, authentication, setup wizard, lead sources, email verification, AI agent, licensing, packaging, dashboard, and campaign optimizer.
+
+See [PROGRESS.md](PROGRESS.md) for the development tracker.
 
 ## Documentation
 
-- [System design](docs/leadgen-system-design-v2.md) — the full product and engineering specification.
-- [Beginner-friendly explanation](docs/leadgen-explained-for-beginners.md) — the whole system in plain English.
-- [Module 1 tutorial](docs/tutorials/module1.md) — how the data layer was built and why every table exists.
+- [System Design](docs/leadgen-system-design-v2.md) — Complete product and engineering specification.
+- [Beginner-Friendly Explanation](docs/leadgen-explained-for-beginners.md) — Understand the entire system in simple language.
+- [Module 1 Tutorial](docs/tutorials/module1.md) — Learn how the database layer was built and why each table exists.
 
-## The honest fine print
+## Important Disclaimer
 
-LeadGen is a tool, not a guarantee. Deliverability and results depend on the client's domains, list quality, and offer. Every deployment starts with a human in the loop, and the product is designed so the safest path is also the default path.
+LeadGen is an automation tool, not a guarantee of sales or deliverability. Results depend on domain reputation, prospect list quality, email content, and the relevance of the business offer.
+
+The system prioritizes responsible outreach, deliverability, and human oversight throughout the process.
