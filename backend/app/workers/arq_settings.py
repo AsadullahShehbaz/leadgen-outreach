@@ -4,7 +4,12 @@ from arq.cron import cron
 from app.core.config import settings
 from app.core.redis import get_redis
 from app.services.mail.fake import FakeMailProvider
-from app.workers.jobs import poll_inbox, send_due
+from app.workers.jobs import (
+    poll_inbox,
+    send_due,
+    source_leads,
+    verify_lead_emails_job,
+)
 
 
 async def startup(ctx: dict) -> None:
@@ -22,7 +27,7 @@ class WorkerSettings:
     redis_settings = RedisSettings.from_dsn(settings.redis_url)
     on_startup = startup
     on_shutdown = shutdown
-    functions = [send_due, poll_inbox]
+    functions = [send_due, poll_inbox, source_leads, verify_lead_emails_job]
     cron_jobs = [
         cron(send_due, minute=set(range(60)), unique=True),
         cron(poll_inbox, minute=set(range(0, 60, 3)), unique=True),

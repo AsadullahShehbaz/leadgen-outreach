@@ -100,8 +100,8 @@ Tests use mock providers and do not send real emails or make external network re
 
 LeadGen is currently in active development.
 
-- **Completed:** Environment setup, complete data layer with 16 database tables, Alembic migrations, passing unit tests, the enrollment state machine, the Redis daily limiter with timezone-aware send windows, suppression/compliance helpers, `send_due` with a FakeMailProvider, the inbox worker, authentication/setup APIs, and spend caps with usage ledger.
-- **Next:** Lead sources and verification.
+- **Completed:** Environment setup, complete data layer with 16 database tables, Alembic migrations, passing unit tests, the enrollment state machine, the Redis daily limiter with timezone-aware send windows, suppression/compliance helpers, `send_due` with a FakeMailProvider, the inbox worker, authentication/setup APIs, spend caps with usage ledger, and source/verification pipelines with fakes.
+- **Next:** LangGraph personalization agent.
 - **Planned:** LangGraph agent, licensing, packaging, dashboard, and campaign optimizer.
 
 See [PROGRESS.md](PROGRESS.md) for the development tracker.
@@ -113,6 +113,7 @@ See [PROGRESS.md](PROGRESS.md) for the development tracker.
 - [Module 1 Tutorial](docs/tutorials/module1.md) — Learn how the database layer was built and why each table exists.
 - [Module 4 Plan](docs/plan/module-04-suppression-compliance.md) — Implemented suppression and compliance helpers.
 - [Module 8 Plan](docs/plan/module-08-spend-caps-ledger.md) — Implemented spend caps and usage ledger.
+- [Module 9 Plan](docs/plan/module-09-sources-verifier.md) — Implemented lead sourcing and verification pipeline.
 
 ## Important Disclaimer
 

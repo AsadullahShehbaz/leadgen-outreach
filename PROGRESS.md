@@ -75,6 +75,12 @@ Module 8 done: UTC spend summaries, daily caps, Postgres-backed atomic reservati
   - `tests/test_spend_caps.py`: cap boundaries, invalid inputs, concurrent fake reservations,
     summaries, store errors, and SQL store behavior.
   - Verified: `307 passed, 2 skipped`; Alembic SQL rendering still passes.
+- [x] Saved and implemented Module 9:
+  - `app/services/sources/`: CSV and public website sources, fake source, workspace-scoped dedupe, and ICP scoring.
+  - `app/services/verify/`: syntax, role-based, MX, catch-all, API/verifier adapters, fake verifier, and spend-gated persistence.
+  - ARQ entry points for source and verification jobs are registered.
+  - Added focused source, verifier, and pipeline tests.
+  - Verified: `317 passed, 2 skipped`.
 - [x] Created the monorepo structure:
 
 ```
@@ -108,6 +114,7 @@ PROGRESS.md
 
 - Postgres connection in `backend/.env` (user must create the Supabase projects).
 - Redis, Docker setup.
+- Module 9 plan saved; implementation not started.
 - Every module in the build order (Module 0 added for environment setup, then Section 22):
 
 | # | Module | Status |
@@ -121,7 +128,7 @@ PROGRESS.md
 | 6 | Inbox worker | Done (2026-11-21) |
 | 7 | Auth + setup wizard API | Done (2026-11-21) |
 | 8 | Spend caps + ledger | Done (2026-11-21) |
-| 9 | Sources + verify | Not started |
+| 9 | Sources + verify | Done (2026-11-21) |
 | 10 | LangGraph agent | Not started |
 | 11 | License | Not started |
 | 12 | Packaging | Not started |
@@ -129,10 +136,10 @@ PROGRESS.md
 | 14 | Optimizer + weekly report | Not started |
 
 ## Next step
-**Module 9 — Sources + verify**.
+**Module 10 — LangGraph agent**.
 
 The Module 1 live-database run is still pending and can be done whenever the Supabase
-URLs are ready; it does not block Module 9:
+URLs are ready; it does not block Module 10:
 
 1. Copy `backend/.env.example` to `backend/.env`.
 2. Fill `DATABASE_URL` with project A's **Session pooler** string.
@@ -141,7 +148,7 @@ URLs are ready; it does not block Module 9:
    - `venv\Scripts\alembic.exe upgrade head`
    - `venv\Scripts\python.exe -m pytest -v`
 5. Expect: 16 tables + `alembic_version` in project A; all tests incl. the migration round-trip pass.
-6. Then mark the acceptance checklist in `docs/plan/module-01-models-migrations.md` and start Module 9.
+6. Then mark the acceptance checklist in `docs/plan/module-01-models-migrations.md` and start Module 10.
 
 ## How to update this file
 
