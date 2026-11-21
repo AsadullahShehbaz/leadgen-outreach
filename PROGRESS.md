@@ -8,6 +8,8 @@ Read `docs/leadgen-system-design-v2.md` first, then `docs/leadgen-explained-for-
 ## Current status
 
 Modules 0, 1 and 2 done in code: environment installed, all 16 tables, async session, Alembic initial migration, and the enrollment state machine. Unit tests pass (182 passed); the migration integration test is skipped until `backend/.env` has the Supabase URLs. The live migration (`alembic upgrade head`) has not been run yet. The database will be Supabase (cloud Postgres). Git repo initialized.
+Module 3 done: Redis-style atomic daily caps and timezone-aware send windows are implemented with fake-Redis and concurrency tests.
+Module 4 done: SHA-256 suppression and domain checks, mandatory footer building, country/lawful-basis rules, and forget-person helpers are implemented.
 
 ## Done
 
@@ -27,6 +29,44 @@ Modules 0, 1 and 2 done in code: environment installed, all 16 tables, async ses
   - `transition()` validates before changing anything, clears `next_send_at` on terminal statuses, writes one `Event` per accepted move, and lets the caller commit.
   - `tests/test_state_machine.py`: all 26 allowed moves, all 143 illegal moves, unknown statuses, event payloads, and rulebook consistency; no database needed.
   - Verified: `pytest` 182 passed / 1 skipped; only `state_machine.py` assigns `Enrollment.status`.
+- [x] Saved and implemented Module 3:
+  - `app/services/sequencing/windows.py`: send-window settings, timezone conversion, workspace-local days, and next-opening calculation.
+  - `app/services/sequencing/limiter.py`: atomic Redis counter reservations, 30-hour TTL, independent mailbox/day keys, and slot release.
+  - `tests/test_windows.py` and `tests/test_limiter.py`: boundaries, weekends, DST, invalid inputs, independent caps, and concurrent acquires.
+  - Verified with the focused Module 3 suite; real-Redis integration runs only when `TEST_REDIS_URL` is configured.
+- [x] Saved and implemented Module 4:
+  - `app/services/compliance/suppression.py`: normalized SHA-256 email hashing, exact-address checks, domain checks, and idempotent suppression additions.
+  - `app/services/compliance/footer.py`: mandatory sender identity, postal address, and opt-out footer.
+  - `app/services/compliance/rules_by_country.py`: standard and strict campaign lawful-basis rules.
+  - `app/services/compliance/forget_person.py`: suppression-before-wipe forget-person workflow.
+  - Added focused suppression, footer, country-rule, and forget-person tests.
+  - Verified: `259 passed, 2 skipped`.
+- [x] Saved and implemented Module 5:
+  - `app/core/redis.py`: Redis client factory.
+  - `app/services/mail/base.py` and `fake.py`: provider interface and no-network fake.
+  - `app/services/sequencing/send_due.py`: kill switch, locks, suppression, license,
+    mailbox, window, daily-cap, send, receipt, and state-advance flow.
+  - `app/workers/arq_settings.py` and `jobs.py`: ARQ worker and one-minute cron.
+  - Added provider and send-engine tests.
+  - Verified: `268 passed, 2 skipped`.
+- [x] Saved and implemented Module 6:
+  - `app/services/mail/bounce_parser.py`: pure DSN 4.x.x / 5.x.x parsing.
+  - `app/services/mail/base.py` and `fake.py`: inbound mail types and no-network fake fetching.
+  - `app/services/agents/reply_classifier.py`: fakeable reply classifier interface.
+  - `app/services/sequencing/inbox_worker.py`: replay-safe thread matching, replies,
+    bounces, suppression, complaint handling, and mailbox penalties.
+  - `app/workers/jobs.py` and `arq_settings.py`: three-minute inbox polling cron.
+  - Added bounce-parser and inbox-worker tests.
+  - Verified: `279 passed, 2 skipped`.
+- [x] Saved and implemented Module 7:
+  - `app/core/security.py`: direct bcrypt password hashing, HS256 JWT, Fernet secret encryption,
+    and Redis-backed token revocation helpers.
+  - `app/routers/auth.py`: OAuth2 password login, current-user lookup, logout, and password change.
+  - `app/routers/setup.py`: first-run admin/workspace setup, license storage, encrypted
+    connections, domain setup, and warming-status mailbox setup.
+  - `app/models/workspace.py` and migration `0002_setup_audit.py`: setup responsibility/completion audit fields.
+  - Added focused auth, setup, and model tests.
+  - Verified: `293 passed, 2 skipped`; both Alembic migrations render valid Postgres SQL.
 - [x] Created the monorepo structure:
 
 ```
@@ -67,11 +107,11 @@ PROGRESS.md
 | 0 | Environment setup (venv + libraries) | Done |
 | 1 | Models + migrations | Implemented; live migration pending Supabase URLs |
 | 2 | State machine | Done (2026-11-21) |
-| 3 | Limiter + windows | Not started |
-| 4 | Suppression + compliance | Not started |
-| 5 | `send_due` + FakeMailProvider | Not started |
-| 6 | Inbox worker | Not started |
-| 7 | Auth + setup wizard API | Not started |
+| 3 | Limiter + windows | Done (2026-11-21) |
+| 4 | Suppression + compliance | Done (2026-11-21) |
+| 5 | `send_due` + FakeMailProvider | Done |
+| 6 | Inbox worker | Done (2026-11-21) |
+| 7 | Auth + setup wizard API | Done (2026-11-21) |
 | 8 | Spend caps + ledger | Not started |
 | 9 | Sources + verify | Not started |
 | 10 | LangGraph agent | Not started |
@@ -81,11 +121,10 @@ PROGRESS.md
 | 14 | Optimizer + weekly report | Not started |
 
 ## Next step
-
-**Module 3 — limiter + send windows** (no Supabase needed; uses Redis plus fakes).
+**Module 8 — Spend caps + ledger**.
 
 The Module 1 live-database run is still pending and can be done whenever the Supabase
-URLs are ready; it does not block Module 3:
+URLs are ready; it does not block Module 4:
 
 1. Copy `backend/.env.example` to `backend/.env`.
 2. Fill `DATABASE_URL` with project A's **Session pooler** string.
@@ -94,7 +133,7 @@ URLs are ready; it does not block Module 3:
    - `venv\Scripts\alembic.exe upgrade head`
    - `venv\Scripts\python.exe -m pytest -v`
 5. Expect: 16 tables + `alembic_version` in project A; all tests incl. the migration round-trip pass.
-6. Then mark the acceptance checklist in `docs/plan/module-01-models-migrations.md` and start Module 3.
+6. Then mark the acceptance checklist in `docs/plan/module-01-models-migrations.md` and start Module 4.
 
 ## How to update this file
 

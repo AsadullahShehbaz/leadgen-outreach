@@ -10,6 +10,7 @@ alembic
 # --- Queue / cache ---
 arq
 redis
+tzdata
 
 # --- Config / validation ---
 pydantic-settings

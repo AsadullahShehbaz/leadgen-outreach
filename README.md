@@ -100,9 +100,9 @@ Tests use mock providers and do not send real emails or make external network re
 
 LeadGen is currently in active development.
 
-- **Completed:** Environment setup, complete data layer with 16 database tables, Alembic migration, passing unit tests, and the enrollment state machine with tests for every allowed and illegal transition.
-- **Next:** The rest of the safety-critical core, including the rate limiter, suppression system, and email sending engine.
-- **Planned:** Inbox worker, authentication, setup wizard, lead sources, email verification, AI agent, licensing, packaging, dashboard, and campaign optimizer.
+- **Completed:** Environment setup, complete data layer with 16 database tables, Alembic migrations, passing unit tests, the enrollment state machine, the Redis daily limiter with timezone-aware send windows, suppression/compliance helpers, `send_due` with a FakeMailProvider, the inbox worker, and authentication/setup APIs.
+- **Next:** Spend caps and usage ledger.
+- **Planned:** Spend caps, lead sources, email verification, AI agent, licensing, packaging, dashboard, and campaign optimizer.
 
 See [PROGRESS.md](PROGRESS.md) for the development tracker.
 
@@ -111,6 +111,7 @@ See [PROGRESS.md](PROGRESS.md) for the development tracker.
 - [System Design](docs/leadgen-system-design-v2.md) — Complete product and engineering specification.
 - [Beginner-Friendly Explanation](docs/leadgen-explained-for-beginners.md) — Understand the entire system in simple language.
 - [Module 1 Tutorial](docs/tutorials/module1.md) — Learn how the database layer was built and why each table exists.
+- [Module 4 Plan](docs/plan/module-04-suppression-compliance.md) — Implemented suppression and compliance helpers.
 
 ## Important Disclaimer
 

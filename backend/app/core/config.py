@@ -42,9 +42,27 @@ class Settings(BaseSettings):
 
     # Placeholder so the app can start before .env exists.
     database_url: str = "postgresql+asyncpg://postgres:postgres@localhost:5432/postgres"
-
+    REDIS_HOST: str = "localhost"
+    REDIS_PORT: int = 6379
+    REDIS_URL: str | None = None
+    SENDING_ENABLED: bool = False
+    PUBLIC_URL: str = "http://localhost"
+    SECRET_KEY: str = "local-development-secret-key-change-me-32bytes"
+    FERNET_KEY: str | None = None
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     # Used only by the migration integration test.
     test_database_url: str | None = None
+
+    send_window_start_hour: int = 9
+    send_window_end_hour: int = 17
+    send_window_days: str = "1,2,3,4,5"
+    test_redis_url: str | None = None
+
+    @property
+    def redis_url(self) -> str:
+        if self.REDIS_URL:
+            return self.REDIS_URL
+        return f"redis://{self.REDIS_HOST}:{self.REDIS_PORT}/0"
 
     @property
     def async_database_url(self) -> str:

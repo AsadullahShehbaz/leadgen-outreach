@@ -16,6 +16,16 @@ class Workspace(TimestampMixin, table=True):
     postal_address: str | None = None
     footer_text: str | None = None
     timezone: str = "UTC"
+    setup_responsibility_accepted_at: datetime | None = Field(
+        default=None,
+        sa_type=DateTime(timezone=True),
+        nullable=True,
+    )
+    setup_completed_at: datetime | None = Field(
+        default=None,
+        sa_type=DateTime(timezone=True),
+        nullable=True,
+    )
     updated_at: datetime = Field(
         default_factory=utcnow,
         sa_type=DateTime(timezone=True),

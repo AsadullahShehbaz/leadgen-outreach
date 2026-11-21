@@ -71,3 +71,18 @@ def test_composite_unique_constraints():
 def test_enrollment_mailbox_is_optional():
     # The mailbox is assigned when the first email is sent, not at enrollment.
     assert SQLModel.metadata.tables["enrollments"].c.mailbox_id.nullable is True
+
+
+def test_module7_setup_fields_exist():
+    workspace_table = SQLModel.metadata.tables["workspaces"]
+    assert "setup_responsibility_accepted_at" in workspace_table.c
+    assert "setup_completed_at" in workspace_table.c
+
+
+def test_module7_connection_kind_is_unique_per_workspace():
+    table = SQLModel.metadata.tables["connections"]
+    assert any(
+        constraint.name == "uq_connections_workspace_id_kind"
+        for constraint in table.constraints
+        if isinstance(constraint, UniqueConstraint)
+    )
