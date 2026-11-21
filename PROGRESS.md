@@ -1,13 +1,13 @@
 # Project Progress
 
-Last updated: 2026-11-19
+Last updated: 2026-11-21
 
 Track what is done so any future session (or coding agent) can pick up where we left off.
 Read `docs/leadgen-system-design-v2.md` first, then `docs/leadgen-explained-for-beginners.md` for the beginner overview.
 
 ## Current status
 
-Modules 0 and 1 done in code: environment installed, all 16 tables, async session, Alembic initial migration, and tests. Unit tests pass (9 passed); the migration integration test is skipped until `backend/.env` has the Supabase URLs. The live migration (`alembic upgrade head`) has not been run yet. Database will be Supabase (cloud Postgres). No git repo yet.
+Modules 0, 1 and 2 done in code: environment installed, all 16 tables, async session, Alembic initial migration, and the enrollment state machine. Unit tests pass (182 passed); the migration integration test is skipped until `backend/.env` has the Supabase URLs. The live migration (`alembic upgrade head`) has not been run yet. The database will be Supabase (cloud Postgres). Git repo initialized.
 
 ## Done
 
@@ -21,6 +21,12 @@ Modules 0 and 1 done in code: environment installed, all 16 tables, async sessio
   - Alembic set up (`alembic.ini`, async `env.py`, `versions/0001_initial_schema.py`).
   - Tests: `test_models.py`, `test_config.py`, `test_migrations.py` (integration test skips without `TEST_DATABASE_URL`).
   - Verified: `pytest` 9 passed / 1 skipped; `alembic upgrade head --sql` renders valid Postgres DDL; `/health` still returns `ok`.
+- [x] Saved the Module 2 plan: `docs/plan/module-02-state-machine.md`.
+- [x] Module 2 implemented:
+  - `app/services/sequencing/state_machine.py`: `ACTIVE`, `EXIT`, `TERMINAL`, `ALLOWED`, `IllegalTransition`, and `transition()` exactly per Section 11.
+  - `transition()` validates before changing anything, clears `next_send_at` on terminal statuses, writes one `Event` per accepted move, and lets the caller commit.
+  - `tests/test_state_machine.py`: all 26 allowed moves, all 143 illegal moves, unknown statuses, event payloads, and rulebook consistency; no database needed.
+  - Verified: `pytest` 182 passed / 1 skipped; only `state_machine.py` assigns `Enrollment.status`.
 - [x] Created the monorepo structure:
 
 ```
@@ -60,7 +66,7 @@ PROGRESS.md
 |---|---|---|
 | 0 | Environment setup (venv + libraries) | Done |
 | 1 | Models + migrations | Implemented; live migration pending Supabase URLs |
-| 2 | State machine | Not started |
+| 2 | State machine | Done (2026-11-21) |
 | 3 | Limiter + windows | Not started |
 | 4 | Suppression + compliance | Not started |
 | 5 | `send_due` + FakeMailProvider | Not started |
@@ -76,7 +82,10 @@ PROGRESS.md
 
 ## Next step
 
-**Finish Module 1 — run against real Supabase.**
+**Module 3 — limiter + send windows** (no Supabase needed; uses Redis plus fakes).
+
+The Module 1 live-database run is still pending and can be done whenever the Supabase
+URLs are ready; it does not block Module 3:
 
 1. Copy `backend/.env.example` to `backend/.env`.
 2. Fill `DATABASE_URL` with project A's **Session pooler** string.
@@ -85,7 +94,7 @@ PROGRESS.md
    - `venv\Scripts\alembic.exe upgrade head`
    - `venv\Scripts\python.exe -m pytest -v`
 5. Expect: 16 tables + `alembic_version` in project A; all tests incl. the migration round-trip pass.
-6. Then mark the acceptance checklist in `docs/plan/module-01-models-migrations.md` and start Module 2 (state machine).
+6. Then mark the acceptance checklist in `docs/plan/module-01-models-migrations.md` and start Module 3.
 
 ## How to update this file
 

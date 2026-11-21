@@ -88,8 +88,8 @@ Tests use fake providers and never touch the network or send a real email.
 
 LeadGen is in active development.
 
-- **Done:** environment, complete data layer — 16 tables, an Alembic migration, and passing unit tests.
-- **Next:** the safety-critical core — state machine, limiter, suppression, and the send engine.
+- **Done:** environment, complete data layer — 16 tables, an Alembic migration, and passing unit tests — plus the enrollment state machine with tests for every allowed and illegal transition.
+- **Next:** the rest of the safety-critical core — limiter, suppression, and the send engine.
 - **Later:** inbox worker, authentication and setup wizard, lead sources and verification, AI agent, licensing, packaging, dashboard, and optimizer.
 
 See [PROGRESS.md](PROGRESS.md) for the live module tracker.
