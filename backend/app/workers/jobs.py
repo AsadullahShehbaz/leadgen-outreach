@@ -12,6 +12,51 @@ from app.models import Campaign, Enrollment, Lead, LeadEmail
 from app.services.agents.personalize_graph import personalize_enrollment
 from app.services.agents.research import FakeResearchClient
 from app.services.agents.llm import GroqLLMClient
+from app.models.base import utcnow
+from app.services.license.license import (
+    InvalidLicense,
+    license_allows_sourcing,
+    refresh_license_state,
+)
+
+
+async def license_check(ctx: dict) -> dict:
+    """Validate the stored license offline once per day."""
+    session = ctx.get("session")
+    if session is not None:
+        return await _license_check_session(session)
+
+    async with Session() as db:
+        return await _license_check_session(db)
+
+
+async def _license_check_session(db) -> dict:
+    from sqlalchemy import select
+    from app.models import LicenseState
+
+    result = await db.exec(
+        select(LicenseState).order_by(LicenseState.created_at.desc()).limit(1)
+    )
+    state = result.first()
+    if state is None:
+        return {"valid": False, "reason": "License is missing"}
+    key = settings.LICENSE_PUBLIC_KEY_PEM
+    if not key:
+        return {"valid": False, "reason": "License public key is missing"}
+    try:
+        status = await refresh_license_state(db, state.token, key)
+    except InvalidLicense:
+        state.valid_until = None
+        state.last_checked_at = utcnow()
+        db.add(state)
+        await db.commit()
+        return {"valid": False, "reason": "License is invalid"}
+    return {
+        "valid": status.valid,
+        "in_grace": status.in_grace,
+        "expires_at": status.expires_at.isoformat() if status.expires_at else None,
+        "reason": status.reason,
+    }
 
 
 async def send_due(ctx: dict) -> int:
@@ -58,6 +103,7 @@ async def source_leads(ctx: dict) -> dict:
         limit=int(ctx.get("limit", 100)),
         source_store=ctx.get("source_store", SqlSpendLedgerStore(session)),
         estimated_usd=float(ctx.get("estimated_usd", 0.0)),
+        license_checker=ctx.get("license_checker", license_allows_sourcing),
     )
 
 

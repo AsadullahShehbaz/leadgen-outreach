@@ -9,6 +9,12 @@ from app.core.security import (
     hash_password,
     normalize_email,
 )
+from app.core.config import settings
+from app.services.license.license import (
+    InvalidLicense,
+    check_mailbox_limit,
+    verify_license_token,
+)
 from app.models import (
     Connection,
     Domain,
@@ -172,6 +178,18 @@ async def store_license(
     user: Annotated[User, Depends(get_current_user)],
     db=Depends(get_session),
 ) -> SetupLicenseResponse:
+    if not settings.LICENSE_PUBLIC_KEY_PEM:
+        raise HTTPException(status.HTTP_503_SERVICE_UNAVAILABLE, "License public key is not configured")
+    try:
+        status = verify_license_token(
+            request.license_token,
+            settings.LICENSE_PUBLIC_KEY_PEM,
+        )
+    except InvalidLicense as exc:
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, str(exc))
+    if not status.valid:
+        raise HTTPException(status.HTTP_422_UNPROCESSABLE_ENTITY, status.reason)
+
     result = await db.exec(
         select(LicenseState).order_by(LicenseState.created_at.desc()).limit(1)
     )
@@ -180,9 +198,16 @@ async def store_license(
         license = LicenseState(token=request.license_token)
     else:
         license.token = request.license_token
+    license.valid_until = status.expires_at
+    license.last_checked_at = utcnow()
     db.add(license)
     await db.commit()
-    return SetupLicenseResponse(stored=True)
+    return SetupLicenseResponse(
+        stored=True,
+        valid=status.valid,
+        in_grace=status.in_grace,
+        expires_at=status.expires_at,
+    )
 
 
 @router.post("/connection", response_model=SetupConnectionResponse)
@@ -284,6 +309,11 @@ async def store_mailbox(
     )
     mailbox = result.first()
     if mailbox is None:
+        if not await check_mailbox_limit(db, user.workspace_id):
+            raise HTTPException(
+                status.HTTP_403_FORBIDDEN,
+                "License mailbox limit reached or license is missing",
+            )
         mailbox = Mailbox(
             workspace_id=user.workspace_id,
             domain_id=domain.id,

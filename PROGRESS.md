@@ -93,6 +93,20 @@ Module 10 done: Groq-backed LangGraph personalization, Pydantic drafts, factual 
   - `tests/test_personalization.py`: draft limits, critic rejection, retry, human review, spend cap,
     approval, queued, and idempotency coverage.
   - Verified: `329 passed, 2 skipped`; Groq and all external providers remain uncalled by tests.
+- [x] Saved the approved Module 11 plan: `docs/plan/module-11-license.md`.
+- [x] Implemented Module 11:
+  - `app/services/license/license.py`: strict Ed25519 JWS verification, required
+    claims, 14-day grace, UTC expiry, source/mailbox limits, and LicenseState helpers.
+  - `POST /setup/license`: rejects missing, malformed, invalid, or past-grace
+    licenses and caches valid expiry/last-check time.
+  - `send_due`: uses the verified license check after suppression and before sending.
+  - `source_leads`: can fail closed on missing, expired, or monthly lead-limit license state.
+  - `POST /setup/mailbox`: prevents new mailboxes past the license limit.
+  - `GET /system/license`: returns redacted authenticated license status.
+  - `license_check`: daily offline ARQ validation cron with idempotent cache updates.
+  - `tests/test_license.py`: Ed25519, tampering, expiry, grace, and malformed claims.
+  - Verified: `338 passed, 2 skipped`.
+- [x] Saved the Module 12 packaging plan: `docs/plan/module-12-packaging.md`.
 - [x] Created the monorepo structure:
 
 ```
@@ -142,13 +156,13 @@ PROGRESS.md
 | 8 | Spend caps + ledger | Done (2026-11-21) |
 | 9 | Sources + verify | Done (2026-11-21) |
 | 10 | LangGraph agent | Done (2026-11-21) |
-| 11 | License | Not started |
+| 11 | License | Done (2026-11-21) |
 | 12 | Packaging | Not started |
 | 13 | React dashboard + wizard | Not started |
 | 14 | Optimizer + weekly report | Not started |
 
 ## Next step
-**Module 11 — License**.
+**Module 12 — Packaging**.
 
 The Module 1 live-database run is still pending and can be done whenever the Supabase
 URLs are ready; it does not block Module 11:

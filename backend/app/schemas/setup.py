@@ -1,3 +1,4 @@
+from datetime import datetime
 from typing import Any
 from uuid import UUID
 
@@ -55,6 +56,9 @@ class SetupLicenseResponse(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     stored: bool
+    valid: bool = True
+    in_grace: bool = False
+    expires_at: datetime | None = None
 
 
 class SetupConnectionRequest(BaseModel):

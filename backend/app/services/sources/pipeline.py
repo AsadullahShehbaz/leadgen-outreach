@@ -158,7 +158,28 @@ async def source_leads(
     limit: int,
     source_store,
     estimated_usd: float = 0.0,
+    license_checker=None,
 ) -> dict:
+    if license_checker is not None:
+        allowed = license_checker(
+            session,
+            workspace_id=workspace_id,
+            additional_leads=limit,
+        )
+        if hasattr(allowed, "__await__"):
+            allowed = await allowed
+        if not bool(allowed):
+            return {
+                "paused": True,
+                "kind": "license",
+                "provider_calls": 0,
+                "created": 0,
+                "updated": 0,
+                "lead_emails": 0,
+                "processed": 0,
+                "reason": "License missing, expired, or lead limit reached",
+            }
+
     limits = SpendLimits.from_settings()
     check = await reserve_usage(
         source_store,

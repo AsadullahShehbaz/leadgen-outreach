@@ -8,7 +8,6 @@ from app.models import (
     Enrollment,
     Lead,
     LeadEmail,
-    LicenseState,
     Mailbox,
     Message,
     SequenceStep,
@@ -21,6 +20,7 @@ from app.services.compliance.suppression import (
     domain_from_email,
     hash_email,
 )
+from app.services.license.license import license_allows_sending as verified_license_allows_sending
 from app.services.mail.base import (
     OutboundMessage,
     PermanentSendError,
@@ -133,20 +133,7 @@ async def license_allows_sending(
     now: datetime | None = None,
 ) -> bool:
     """A missing or expired license blocks sends, but never compliance work."""
-    current = now or datetime.now(timezone.utc)
-    result = await db.exec(
-        select(LicenseState)
-        .where(LicenseState.valid_until.is_not(None))
-        .order_by(LicenseState.valid_until.desc())
-        .limit(1)
-    )
-    state = result.first()
-    if state is None or state.valid_until is None:
-        return False
-    valid_until = state.valid_until
-    if valid_until.tzinfo is None:
-        valid_until = valid_until.replace(tzinfo=timezone.utc)
-    return valid_until >= current.astimezone(timezone.utc)
+    return await verified_license_allows_sending(db, now)
 
 
 async def sending_enabled(redis, configured: bool) -> bool:

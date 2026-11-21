@@ -51,6 +51,7 @@ class Settings(BaseSettings):
     PUBLIC_URL: str = "http://localhost"
     SECRET_KEY: str = "local-development-secret-key-change-me-32bytes"
     FERNET_KEY: str | None = None
+    LICENSE_PUBLIC_KEY_PEM: str | None = None
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     # Used only by the migration integration test.
     test_database_url: str | None = None

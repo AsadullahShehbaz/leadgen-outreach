@@ -100,9 +100,9 @@ Tests use mock providers and do not send real emails or make external network re
 
 LeadGen is currently in active development.
 
-- **Completed:** Environment setup, complete data layer with 16 database tables, Alembic migrations, passing unit tests, the enrollment state machine, the Redis daily limiter with timezone-aware send windows, suppression/compliance helpers, `send_due` with a FakeMailProvider, the inbox worker, authentication/setup APIs, spend caps with usage ledger, source/verification pipelines with fakes, and the LangGraph personalization agent using Groq's OpenAI-compatible API.
-- **Next:** License enforcement.
-- **Planned:** Licensing, packaging, dashboard, and campaign optimizer.
+- **Completed:** Environment setup, complete data layer with 16 database tables, Alembic migrations, passing unit tests, the enrollment state machine, the Redis daily limiter with timezone-aware send windows, suppression/compliance helpers, `send_due` with a FakeMailProvider, the inbox worker, authentication/setup APIs, spend caps with usage ledger, source/verification pipelines with fakes, the LangGraph personalization agent using Groq's OpenAI-compatible API, and offline Ed25519 license enforcement.
+- **Next:** Packaging.
+- **Planned:** Dashboard and campaign optimizer.
 
 See [PROGRESS.md](PROGRESS.md) for the development tracker.
 
@@ -115,6 +115,7 @@ See [PROGRESS.md](PROGRESS.md) for the development tracker.
 - [Module 8 Plan](docs/plan/module-08-spend-caps-ledger.md) — Implemented spend caps and usage ledger.
 - [Module 9 Plan](docs/plan/module-09-sources-verifier.md) — Implemented lead sourcing and verification pipeline.
 - [Module 10 Plan](docs/plan/module-10-langgraph-agent.md) — Implemented LangGraph personalization with a factual critic.
+- [Module 12 Plan](docs/plan/module-12-packaging.md) — Docker, deployment, backup, update, rollback, and support packaging plan.
 
 ## Important Disclaimer
 
