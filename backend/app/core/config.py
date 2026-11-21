@@ -1,5 +1,7 @@
+from math import isfinite
 from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -57,6 +59,23 @@ class Settings(BaseSettings):
     send_window_end_hour: int = 17
     send_window_days: str = "1,2,3,4,5"
     test_redis_url: str | None = None
+    MAX_LLM_USD_PER_DAY: float = 0.0
+    MAX_VERIFICATIONS_PER_DAY: int = 0
+    MAX_SOURCE_CREDITS_PER_DAY: int = 0
+
+    @field_validator("MAX_LLM_USD_PER_DAY")
+    @classmethod
+    def validate_llm_daily_limit(cls, value: float) -> float:
+        if not isfinite(value) or value < 0:
+            raise ValueError("MAX_LLM_USD_PER_DAY must be a finite non-negative number")
+        return value
+
+    @field_validator("MAX_VERIFICATIONS_PER_DAY", "MAX_SOURCE_CREDITS_PER_DAY")
+    @classmethod
+    def validate_daily_unit_limit(cls, value: int) -> int:
+        if value < 0:
+            raise ValueError("daily spend limits must be non-negative")
+        return value
 
     @property
     def redis_url(self) -> str:

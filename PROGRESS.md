@@ -10,6 +10,7 @@ Read `docs/leadgen-system-design-v2.md` first, then `docs/leadgen-explained-for-
 Modules 0, 1 and 2 done in code: environment installed, all 16 tables, async session, Alembic initial migration, and the enrollment state machine. Unit tests pass (182 passed); the migration integration test is skipped until `backend/.env` has the Supabase URLs. The live migration (`alembic upgrade head`) has not been run yet. The database will be Supabase (cloud Postgres). Git repo initialized.
 Module 3 done: Redis-style atomic daily caps and timezone-aware send windows are implemented with fake-Redis and concurrency tests.
 Module 4 done: SHA-256 suppression and domain checks, mandatory footer building, country/lawful-basis rules, and forget-person helpers are implemented.
+Module 8 done: UTC spend summaries, daily caps, Postgres-backed atomic reservations, and tests are implemented.
 
 ## Done
 
@@ -67,6 +68,13 @@ Module 4 done: SHA-256 suppression and domain checks, mandatory footer building,
   - `app/models/workspace.py` and migration `0002_setup_audit.py`: setup responsibility/completion audit fields.
   - Added focused auth, setup, and model tests.
   - Verified: `293 passed, 2 skipped`; both Alembic migrations render valid Postgres SQL.
+- [x] Saved and implemented Module 8:
+  - `app/core/config.py` and `.env.example`: daily LLM, verification, and source limits; zero disables paid work.
+  - `app/services/budget/spend_caps.py`: validated spend checks, ledger recording, UTC summaries,
+    and transaction-locked Postgres reservations.
+  - `tests/test_spend_caps.py`: cap boundaries, invalid inputs, concurrent fake reservations,
+    summaries, store errors, and SQL store behavior.
+  - Verified: `307 passed, 2 skipped`; Alembic SQL rendering still passes.
 - [x] Created the monorepo structure:
 
 ```
@@ -112,7 +120,7 @@ PROGRESS.md
 | 5 | `send_due` + FakeMailProvider | Done |
 | 6 | Inbox worker | Done (2026-11-21) |
 | 7 | Auth + setup wizard API | Done (2026-11-21) |
-| 8 | Spend caps + ledger | Not started |
+| 8 | Spend caps + ledger | Done (2026-11-21) |
 | 9 | Sources + verify | Not started |
 | 10 | LangGraph agent | Not started |
 | 11 | License | Not started |
@@ -121,10 +129,10 @@ PROGRESS.md
 | 14 | Optimizer + weekly report | Not started |
 
 ## Next step
-**Module 8 — Spend caps + ledger**.
+**Module 9 — Sources + verify**.
 
 The Module 1 live-database run is still pending and can be done whenever the Supabase
-URLs are ready; it does not block Module 4:
+URLs are ready; it does not block Module 9:
 
 1. Copy `backend/.env.example` to `backend/.env`.
 2. Fill `DATABASE_URL` with project A's **Session pooler** string.
@@ -133,7 +141,7 @@ URLs are ready; it does not block Module 4:
    - `venv\Scripts\alembic.exe upgrade head`
    - `venv\Scripts\python.exe -m pytest -v`
 5. Expect: 16 tables + `alembic_version` in project A; all tests incl. the migration round-trip pass.
-6. Then mark the acceptance checklist in `docs/plan/module-01-models-migrations.md` and start Module 4.
+6. Then mark the acceptance checklist in `docs/plan/module-01-models-migrations.md` and start Module 9.
 
 ## How to update this file
 

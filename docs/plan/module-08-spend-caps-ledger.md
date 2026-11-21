@@ -1,6 +1,6 @@
 # Module 8 Plan - Spend Caps + Ledger
 
-Status: planned (2026-11-21).
+Status: implemented (2026-11-21).
 Design reference: `docs/leadgen-system-design-v2.md`, Sections 10, 13, 20-22
 (module 8).
 Acceptance test from the design: **a cap hit pauses the step**.
@@ -35,12 +35,12 @@ implement those jobs themselves.
 | Question | Decision |
 |---|---|
 | Ledger kinds | Only `llm`, `verify`, and `source`, matching the existing `SpendLedger.kind` column. |
-| Ledger granularity | One row per call or batch usage event. No pre-aggregation is required in this module. |
+| Ledger granularity | One row per completed call or atomic reservation. |
 | Daily key | UTC calendar date. Use `date.today()` only in a single pure function boundary; callers pass an explicit date for tests. |
 | Monthly summary | UTC month to date, from the first calendar day through the supplied UTC date. |
 | Cap check | Fail closed on an unknown kind or invalid limit. A cap hit returns `allowed=false`; it does not raise for normal limit conditions. |
-| Atomicity | Check and reserve usage atomically in the database-backed implementation. Concurrent calls must not allow the total to exceed the daily limit. |
-| Reservations | Module 8 records usage after a call. A reservation is optional and may be added only if later modules need crash-safe pre-metering. |
+| Atomicity | The Postgres store serializes reservations by UTC day and kind with a transaction-scoped advisory lock. Concurrent calls must not exceed the daily limit. |
+| Reservations | A reservation is written to the ledger before external work and counts against the cap. This is intentionally conservative: do not record the same usage again after the call. |
 | Estimated costs | Store caller-supplied `est_usd`; never invent or fetch vendor prices. |
 | Units | Units are caller-supplied non-negative integers. LLM use may be token units or a cost model chosen by Module 10; verification/source use is provider units. |
 | Cap hit behavior | Return a `SpendCapHit` result and require the caller to pause that step and raise a dashboard alert. No state-machine status change is made here. |
@@ -183,7 +183,11 @@ Behavior:
 - A call is allowed only when existing usage plus requested usage stays within the
   positive configured limit.
 - `check_spend()` must not write the ledger. Recording is a separate explicit action.
-- `record_usage()` writes exactly one ledger row for one completed call/batch.
+- `record_usage()` writes exactly one ledger row for one completed call/batch when the
+  caller is not using atomic reservations.
+- `reserve_usage()` atomically checks and writes one ledger row. Commit the current
+  database transaction before starting vendor work; the row is the usage estimate and
+  must not be recorded a second time.
 - A cap hit does not consume or record usage.
 - Store or database failure raises explicitly; callers must fail closed and must not
   run the paid call.
@@ -205,18 +209,20 @@ class SqlSpendLedgerStore:
 The store should query `SpendLedger` and aggregate in SQL. It must use the existing
 model and UTC `day` column. It should not create a `SpendLedger` row for a denied call.
 
-For a later provider call, the intended usage pattern is:
+For a later provider call, use atomic reservation and commit before calling the vendor:
 
 ```python
-check = await check_spend(store, "llm", limits, units, estimated_usd)
+check = await reserve_usage(store, "llm", limits, units, estimated_usd)
 if not check.allowed:
     pause_step()
 else:
+    await db.commit()
     result = await paid_provider_call()
-    await record_usage(store, "llm", units, estimated_usd)
 ```
 
-Module 8 does not implement `paid_provider_call()`.
+Module 8 does not implement `paid_provider_call()`. A failed or interrupted call
+leaves its reservation counted for that day; this favors preventing overspend over
+automatically refunding an estimate when vendor billing is unknown.
 
 ## Atomic cap check
 
@@ -247,10 +253,10 @@ async def reserve_usage(
     ...
 ```
 
-For Module 8, providers may use `check_spend` plus `record_usage` only if the
-implementation explicitly marks that as not reserving and no concurrent paid calls
-will use it. The recommended implementation is a real atomic reserve, with a later
-provider call and ledger record only after successful completion.
+`check_spend` is read-only and can race with concurrent calls. Future provider jobs
+must use `reserve_usage` for the cap gate. `record_usage` is available for non-
+concurrent completed calls and must not be combined with a reservation for the same
+usage.
 
 Do not overextend into Redis reservations. Postgres is the source of truth.
 
@@ -315,16 +321,16 @@ touch a real provider or send email.
 
 ## Acceptance checklist
 
-- [ ] `MAX_LLM_USD_PER_DAY`, `MAX_VERIFICATIONS_PER_DAY`, and
+- [x] `MAX_LLM_USD_PER_DAY`, `MAX_VERIFICATIONS_PER_DAY`, and
       `MAX_SOURCE_CREDITS_PER_DAY` are documented and loaded by `Settings`.
-- [ ] No cap can be silently bypassed by a zero or invalid limit.
-- [ ] `llm`, `verify`, and `source` kinds are the only supported kinds.
-- [ ] Cap checks do not record usage.
-- [ ] Successful usage creates a ledger row.
-- [ ] A cap hit pauses the relevant step and emits no send/state/compliance side effect.
-- [ ] Concurrent reservations cannot exceed a configured limit.
-- [ ] Today's and month-to-date summaries are UTC and inclusive.
-- [ ] No secrets or provider billing values are read into logs.
-- [ ] Tests cover boundary, invalid input, store failure, concurrency, and summaries.
-- [ ] `pytest` passes with the implementation.
-- [ ] `PROGRESS.md` marks Module 8 done and points to Module 9.
+- [x] No cap can be silently bypassed by a zero or invalid limit.
+- [x] `llm`, `verify`, and `source` kinds are the only supported kinds.
+- [x] Read-only cap checks do not record usage; reservations do.
+- [x] Successful usage or reservation creates one ledger row.
+- [x] A cap hit does not write a row or cause send/state/compliance side effects.
+- [x] Concurrent reservations are serialized in Postgres and tested with a concurrent fake store.
+- [x] Today's and month-to-date summaries are UTC and inclusive.
+- [x] No secrets or provider billing values are read into logs.
+- [x] Tests cover boundary, invalid input, store failure, concurrency, SQL aggregation, and summaries.
+- [x] `pytest` passes with the implementation.
+- [x] `PROGRESS.md` marks Module 8 done and points to Module 9.
