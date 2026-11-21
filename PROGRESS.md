@@ -107,6 +107,12 @@ Module 10 done: Groq-backed LangGraph personalization, Pydantic drafts, factual 
   - `tests/test_license.py`: Ed25519, tampering, expiry, grace, and malformed claims.
   - Verified: `338 passed, 2 skipped`.
 - [x] Saved the Module 12 packaging plan: `docs/plan/module-12-packaging.md`.
+- [x] Module 12 packaging implementation:
+  - `backend/Dockerfile` and `.dockerignore` build and isolate the API and worker image.
+  - `deploy/docker-compose.yml` and `deploy/Caddyfile` package Caddy, API, worker, Postgres, and Redis.
+  - Install, update, rollback, encrypted backup, manual restore, and redacted support-bundle scripts are implemented.
+  - Packaging tests cover service layout, routes, secret handling, bounded health checks, and script safety.
+  - Install, runbook, and backup/restore documentation added under `docs/`.
 - [x] Created the monorepo structure:
 
 ```

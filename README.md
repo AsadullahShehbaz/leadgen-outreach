@@ -100,9 +100,9 @@ Tests use mock providers and do not send real emails or make external network re
 
 LeadGen is currently in active development.
 
-- **Completed:** Environment setup, complete data layer with 16 database tables, Alembic migrations, passing unit tests, the enrollment state machine, the Redis daily limiter with timezone-aware send windows, suppression/compliance helpers, `send_due` with a FakeMailProvider, the inbox worker, authentication/setup APIs, spend caps with usage ledger, source/verification pipelines with fakes, the LangGraph personalization agent using Groq's OpenAI-compatible API, and offline Ed25519 license enforcement.
-- **Next:** Packaging.
-- **Planned:** Dashboard and campaign optimizer.
+- **Completed:** Environment setup, complete data layer with 16 database tables, Alembic migrations, passing unit tests, the enrollment state machine, the Redis daily limiter with timezone-aware send windows, suppression/compliance helpers, `send_due` with a FakeMailProvider, the inbox worker, authentication/setup APIs, spend caps with usage ledger, source/verification pipelines with fakes, the LangGraph personalization agent using Groq's OpenAI-compatible API, offline Ed25519 license enforcement, and Docker packaging.
+- **Next:** Dashboard and setup wizard.
+- **Planned:** Campaign optimizer and weekly report.
 
 See [PROGRESS.md](PROGRESS.md) for the development tracker.
 
