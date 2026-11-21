@@ -8,6 +8,10 @@ from app.services.sequencing.send_due import send_due as send_due_engine
 from app.services.sources.pipeline import source_leads as source_leads_engine
 from app.services.verify.mx import DnsMxLookup
 from app.services.verify.pipeline import verify_lead_emails as verify_lead_emails_engine
+from app.models import Campaign, Enrollment, Lead, LeadEmail
+from app.services.agents.personalize_graph import personalize_enrollment
+from app.services.agents.research import FakeResearchClient
+from app.services.agents.llm import GroqLLMClient
 
 
 async def send_due(ctx: dict) -> int:
@@ -69,4 +73,41 @@ async def verify_lead_emails_job(ctx: dict) -> dict:
         ),
         mx_lookup=ctx.get("mx_lookup", DnsMxLookup()),
         risky_share_cap=ctx.get("risky_share_cap"),
+    )
+
+
+async def personalize(ctx: dict) -> dict:
+    """Personalize one verified enrollment; never sends or queues implicitly."""
+    session = ctx["session"]
+    enrollment_id = ctx["enrollment_id"]
+
+    enrollment = await session.get(Enrollment, enrollment_id)
+    if enrollment is None:
+        return {"paused": False, "human_review": True, "draft": None, "provider_calls": 0}
+
+    campaign = await session.get(Campaign, enrollment.campaign_id)
+    lead = await session.get(Lead, enrollment.lead_id)
+    lead_email = await session.get(LeadEmail, enrollment.lead_email_id)
+    if campaign is None or lead is None or lead_email is None:
+        return {"paused": False, "human_review": True, "draft": None, "provider_calls": 0}
+
+    llm = ctx.get("llm")
+    if llm is None:
+        if not settings.LLM_API_KEY:
+            raise RuntimeError("LLM_API_KEY is required for personalization")
+        llm = GroqLLMClient(
+            api_key=settings.LLM_API_KEY,
+            base_url=settings.LLM_BASE_URL,
+        )
+
+    return await personalize_enrollment(
+        session=session,
+        enrollment=enrollment,
+        campaign=campaign,
+        lead=lead,
+        lead_email=lead_email,
+        llm=llm,
+        research=ctx.get("research", FakeResearchClient()),
+        spend_store=ctx.get("spend_store", SqlSpendLedgerStore(session)),
+        suppression_store=ctx.get("suppression_store"),
     )

@@ -86,3 +86,8 @@ def test_module7_connection_kind_is_unique_per_workspace():
         for constraint in table.constraints
         if isinstance(constraint, UniqueConstraint)
     )
+
+
+def test_module10_draft_field_exists():
+    draft_column = SQLModel.metadata.tables["enrollments"].c.draft
+    assert draft_column.nullable is True

@@ -54,6 +54,10 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     # Used only by the migration integration test.
     test_database_url: str | None = None
+    LLM_BASE_URL: str = "https://api.groq.com/openai/v1"
+    LLM_API_KEY: str | None = None
+    LLM_MODEL_SMALL: str = "llama-3.1-8b-instant"
+    LLM_MODEL_LARGE: str = "llama-3.3-70b-versatile"
 
     send_window_start_hour: int = 9
     send_window_end_hour: int = 17

@@ -11,6 +11,7 @@ Modules 0, 1 and 2 done in code: environment installed, all 16 tables, async ses
 Module 3 done: Redis-style atomic daily caps and timezone-aware send windows are implemented with fake-Redis and concurrency tests.
 Module 4 done: SHA-256 suppression and domain checks, mandatory footer building, country/lawful-basis rules, and forget-person helpers are implemented.
 Module 8 done: UTC spend summaries, daily caps, Postgres-backed atomic reservations, and tests are implemented.
+Module 10 done: Groq-backed LangGraph personalization, Pydantic drafts, factual critic retries, persisted drafts, approval transitions, and spend-cap gates are implemented.
 
 ## Done
 
@@ -81,6 +82,17 @@ Module 8 done: UTC spend summaries, daily caps, Postgres-backed atomic reservati
   - ARQ entry points for source and verification jobs are registered.
   - Added focused source, verifier, and pipeline tests.
   - Verified: `317 passed, 2 skipped`.
+- [x] Saved and implemented Module 10:
+  - `app/services/agents/llm.py`: Groq is the default OpenAI-compatible provider, with a fake LLM for tests.
+  - `app/services/agents/research.py`: fakeable bounded research interface.
+  - `app/services/agents/personalize_graph.py`: LangGraph score/research/angle/draft/critic/save workflow,
+    Pydantic `Draft` validation, local claim support checks, at-most-two retries, human-review fallback,
+    persisted enrollment drafts, and state-machine transitions.
+  - `app/models/enrollment.py` and migration `0003_personalization_draft.py`: nullable JSONB draft storage.
+  - `app/workers/jobs.py`: `personalize` ARQ entry point and worker registration.
+  - `tests/test_personalization.py`: draft limits, critic rejection, retry, human review, spend cap,
+    approval, queued, and idempotency coverage.
+  - Verified: `329 passed, 2 skipped`; Groq and all external providers remain uncalled by tests.
 - [x] Created the monorepo structure:
 
 ```
@@ -129,17 +141,17 @@ PROGRESS.md
 | 7 | Auth + setup wizard API | Done (2026-11-21) |
 | 8 | Spend caps + ledger | Done (2026-11-21) |
 | 9 | Sources + verify | Done (2026-11-21) |
-| 10 | LangGraph agent | Not started |
+| 10 | LangGraph agent | Done (2026-11-21) |
 | 11 | License | Not started |
 | 12 | Packaging | Not started |
 | 13 | React dashboard + wizard | Not started |
 | 14 | Optimizer + weekly report | Not started |
 
 ## Next step
-**Module 10 — LangGraph agent**.
+**Module 11 — License**.
 
 The Module 1 live-database run is still pending and can be done whenever the Supabase
-URLs are ready; it does not block Module 10:
+URLs are ready; it does not block Module 11:
 
 1. Copy `backend/.env.example` to `backend/.env`.
 2. Fill `DATABASE_URL` with project A's **Session pooler** string.
@@ -148,7 +160,7 @@ URLs are ready; it does not block Module 10:
    - `venv\Scripts\alembic.exe upgrade head`
    - `venv\Scripts\python.exe -m pytest -v`
 5. Expect: 16 tables + `alembic_version` in project A; all tests incl. the migration round-trip pass.
-6. Then mark the acceptance checklist in `docs/plan/module-01-models-migrations.md` and start Module 10.
+6. Then mark the acceptance checklist in `docs/plan/module-01-models-migrations.md` and continue with Module 11.
 
 ## How to update this file
 

@@ -2,6 +2,7 @@ from datetime import datetime
 from uuid import UUID, uuid4
 
 from sqlalchemy import DateTime, Index, Text, UniqueConstraint, Column
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlmodel import Field
 
 from app.models.base import TimestampMixin, jsonb_column, tz_column, utcnow
@@ -27,6 +28,10 @@ class Enrollment(TimestampMixin, table=True):
     step_no: int = 0
     next_send_at: datetime | None = Field(default=None, sa_column=tz_column())
     variant_id: str | None = None
+    draft: dict | None = Field(
+        default=None,
+        sa_column=Column(JSONB, nullable=True),
+    )
 
 
 class Message(TimestampMixin, table=True):
