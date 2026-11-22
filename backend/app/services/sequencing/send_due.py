@@ -6,6 +6,7 @@ from sqlalchemy import select
 from app.models import (
     Campaign,
     Enrollment,
+    Experiment,
     Lead,
     LeadEmail,
     Mailbox,
@@ -21,6 +22,7 @@ from app.services.compliance.suppression import (
     hash_email,
 )
 from app.services.license.license import license_allows_sending as verified_license_allows_sending
+from app.services.agents.optimizer import choose_variant
 from app.services.mail.base import (
     OutboundMessage,
     PermanentSendError,
@@ -348,6 +350,24 @@ async def send_due(ctx: dict) -> int:
             workspace = await db.get(Workspace, mailbox.workspace_id)
             if lead is None or lead_email is None or campaign is None or workspace is None:
                 continue
+
+            if enrollment.variant_id is None:
+                experiment_result = await db.exec(
+                    select(Experiment).where(
+                        Experiment.campaign_id == campaign.id,
+                        Experiment.kind == "subject",
+                    ).limit(1)
+                )
+                experiment = experiment_result.first()
+                if experiment is not None:
+                    arm_stats = experiment.stats if isinstance(experiment.stats, dict) else {}
+                    if arm_stats:
+                        enrollment.variant_id = choose_variant(
+                            arm_stats,
+                            minimum_sample=int(
+                                ctx.get("optimizer_minimum_sample", 30)
+                            ),
+                        )
 
             allowed, reason = can_contact(
                 lead.country,

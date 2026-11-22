@@ -1,3 +1,7 @@
+from datetime import timedelta
+
+from sqlalchemy import select
+
 from app.core.config import settings
 from app.core.db import Session
 from app.core.redis import get_redis
@@ -8,7 +12,18 @@ from app.services.sequencing.send_due import send_due as send_due_engine
 from app.services.sources.pipeline import source_leads as source_leads_engine
 from app.services.verify.mx import DnsMxLookup
 from app.services.verify.pipeline import verify_lead_emails as verify_lead_emails_engine
-from app.models import Campaign, Enrollment, Lead, LeadEmail
+from app.models import (
+    Campaign,
+    Enrollment,
+    Event,
+    Lead,
+    LeadEmail,
+    Mailbox,
+    Message,
+    SequenceStep,
+    User,
+    Workspace,
+)
 from app.services.agents.personalize_graph import personalize_enrollment
 from app.services.agents.research import FakeResearchClient
 from app.services.agents.llm import GroqLLMClient
@@ -18,6 +33,8 @@ from app.services.license.license import (
     license_allows_sourcing,
     refresh_license_state,
 )
+from app.services.agents.optimizer import build_weekly_report
+from app.services.mail.base import OutboundMessage
 
 
 async def license_check(ctx: dict) -> dict:
@@ -157,3 +174,134 @@ async def personalize(ctx: dict) -> dict:
         spend_store=ctx.get("spend_store", SqlSpendLedgerStore(session)),
         suppression_store=ctx.get("suppression_store"),
     )
+
+
+async def weekly_report(ctx: dict) -> dict:
+    """Build one aggregate weekly report per workspace; never send prospect mail."""
+    session = ctx.get("session")
+    if session is not None:
+        return await _weekly_report_session(ctx, session)
+    async with Session() as db:
+        return await _weekly_report_session(ctx, db)
+
+
+async def _weekly_report_session(ctx: dict, session) -> dict:
+    mail = ctx.get("mail")
+    now = ctx.get("now") or utcnow()
+    week_start = (now - timedelta(days=7)).replace(
+        hour=0,
+        minute=0,
+        second=0,
+        microsecond=0,
+    )
+
+    workspaces = (await session.exec(select(Workspace))).all()
+    reports = []
+    for workspace in workspaces:
+        campaigns = (
+            await session.exec(
+                select(Campaign).where(Campaign.workspace_id == workspace.id)
+            )
+        ).all()
+        campaign_ids = [campaign.id for campaign in campaigns]
+        sent = 0
+        positive_replies = 0
+        if campaign_ids:
+            sent_messages = (
+                await session.exec(
+                    select(Message).join(
+                        Enrollment,
+                        Message.enrollment_id == Enrollment.id,
+                    ).where(
+                        Enrollment.campaign_id.in_(campaign_ids),
+                        Message.direction == "out",
+                        Message.sent_at >= week_start,
+                        Message.sent_at <= now,
+                    )
+                )
+            ).all()
+            sent = len(sent_messages)
+
+            events = (
+                await session.exec(
+                    select(Event).join(
+                        Enrollment,
+                        Event.enrollment_id == Enrollment.id,
+                    ).join(
+                        Campaign,
+                        Enrollment.campaign_id == Campaign.id,
+                    ).where(
+                        Campaign.workspace_id == workspace.id,
+                        Event.type == "state",
+                        Event.at >= week_start,
+                        Event.at <= now,
+                    )
+                )
+            ).all()
+            positive_replies = sum(
+                1
+                for event in events
+                if isinstance(event.payload, dict)
+                and event.payload.get("reply_class") in {"interested", "question"}
+            )
+
+        best_angle = next(
+            (
+                step.angle_hint
+                for campaign in campaigns
+                for step in (
+                    (
+                        await session.exec(
+                            select(SequenceStep).where(
+                                SequenceStep.campaign_id == campaign.id
+                            ).order_by(SequenceStep.step_no)
+                        )
+                    ).all()
+                )
+                if step.angle_hint
+            ),
+            None,
+        )
+        report = build_weekly_report(
+            workspace_name=workspace.name,
+            week_start=week_start,
+            sent=sent,
+            positive_replies=positive_replies,
+            best_segment=None,
+            best_angle=best_angle,
+            spend_by_kind={"llm": 0.0, "verify": 0.0, "source": 0.0},
+        )
+        reports.append(report)
+
+        users = (
+            await session.exec(
+                select(User).where(User.workspace_id == workspace.id).order_by(User.created_at)
+            )
+        ).all()
+        if mail is not None and users:
+            mailbox = (
+                await session.exec(
+                    select(Mailbox).where(
+                        Mailbox.workspace_id == workspace.id,
+                        Mailbox.status == "active",
+                    ).limit(1)
+                )
+            ).first()
+            if mailbox is not None:
+                body = (
+                    f"LeadGen weekly report\n"
+                    f"Sent: {sent}\n"
+                    f"Positive replies: {positive_replies}\n"
+                    f"Positive reply rate: {report['positive_reply_rate']:.2%}\n"
+                )
+                await mail.send(
+                    mailbox,
+                    OutboundMessage(
+                        from_address=mailbox.address,
+                        to_address=users[0].email,
+                        subject="LeadGen weekly report",
+                        body=body,
+                    ),
+                )
+
+    return {"reports": reports, "count": len(reports)}

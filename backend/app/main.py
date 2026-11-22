@@ -9,11 +9,27 @@ from app.core.config import settings
 from app.routers.auth import router as auth_router
 from app.routers.setup import router as setup_router
 from app.routers.system import router as system_router
+from app.routers.connections import router as connections_router
+from app.routers.domains import router as domains_router
+from app.routers.mailboxes import router as mailboxes_router
+from app.routers.campaigns import router as campaigns_router
+from app.routers.leads import router as leads_router
+from app.routers.inbox import router as inbox_router
+from app.routers.analytics import router as analytics_router
+from app.routers.compliance import router as compliance_router
 
 app = FastAPI(title="LeadGen Agent")
 app.include_router(auth_router)
 app.include_router(setup_router)
 app.include_router(system_router)
+app.include_router(connections_router)
+app.include_router(domains_router)
+app.include_router(mailboxes_router)
+app.include_router(campaigns_router)
+app.include_router(leads_router)
+app.include_router(inbox_router)
+app.include_router(analytics_router)
+app.include_router(compliance_router)
 
 
 @app.get("/health")

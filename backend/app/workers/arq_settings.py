@@ -11,6 +11,7 @@ from app.workers.jobs import (
     send_due,
     source_leads,
     verify_lead_emails_job,
+    weekly_report,
 )
 
 
@@ -36,9 +37,11 @@ class WorkerSettings:
         verify_lead_emails_job,
         personalize,
         license_check,
+        weekly_report,
     ]
     cron_jobs = [
         cron(send_due, minute=set(range(60)), unique=True),
         cron(poll_inbox, minute=set(range(0, 60, 3)), unique=True),
         cron(license_check, hour={0}, minute={5}, unique=True),
+        cron(weekly_report, weekday={0}, hour={8}, minute={0}, unique=True),
     ]

@@ -100,9 +100,8 @@ Tests use mock providers and do not send real emails or make external network re
 
 LeadGen is currently in active development.
 
-- **Completed:** Environment setup, complete data layer with 16 database tables, Alembic migrations, passing unit tests, the enrollment state machine, the Redis daily limiter with timezone-aware send windows, suppression/compliance helpers, `send_due` with a FakeMailProvider, the inbox worker, authentication/setup APIs, spend caps with usage ledger, source/verification pipelines with fakes, the LangGraph personalization agent using Groq's OpenAI-compatible API, offline Ed25519 license enforcement, and Docker packaging.
-- **Next:** Dashboard and setup wizard.
-- **Planned:** Campaign optimizer and weekly report.
+- **Completed:** Environment setup, complete data layer with 16 database tables, Alembic migrations, passing unit tests, the enrollment state machine, the Redis daily limiter with timezone-aware send windows, suppression/compliance helpers, `send_due` with a FakeMailProvider, the inbox worker, authentication/setup APIs, spend caps with usage ledger, source/verification pipelines with fakes, the LangGraph personalization agent using Groq's OpenAI-compatible API, offline Ed25519 license enforcement, Docker packaging, the React dashboard, and the campaign optimizer with weekly reports.
+- **Next:** Live database configuration and external provider credentials.
 
 See [PROGRESS.md](PROGRESS.md) for the development tracker.
 
@@ -116,6 +115,7 @@ See [PROGRESS.md](PROGRESS.md) for the development tracker.
 - [Module 9 Plan](docs/plan/module-09-sources-verifier.md) — Implemented lead sourcing and verification pipeline.
 - [Module 10 Plan](docs/plan/module-10-langgraph-agent.md) — Implemented LangGraph personalization with a factual critic.
 - [Module 12 Plan](docs/plan/module-12-packaging.md) — Docker, deployment, backup, update, rollback, and support packaging plan.
+- [Module 14 Plan](docs/plan/module-14-optimizer-weekly-report.md) — Variant optimizer, ICP ranking, and weekly report plan.
 
 ## Important Disclaimer
 

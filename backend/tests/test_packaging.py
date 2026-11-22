@@ -1,9 +1,18 @@
 from pathlib import Path
 
+import pytest
+
 
 ROOT = Path(__file__).resolve().parents[2]
 BACKEND = ROOT / "backend"
 DEPLOY = ROOT / "deploy"
+
+# The API container mounts only the backend folder, so the deployment files
+# are not available there. Run these tests on the host instead.
+pytestmark = pytest.mark.skipif(
+    not (DEPLOY / "docker-compose.yml").is_file(),
+    reason="deployment files are not available in this environment",
+)
 
 
 def test_compose_services_and_volumes():

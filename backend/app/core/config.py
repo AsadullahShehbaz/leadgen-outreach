@@ -67,6 +67,8 @@ class Settings(BaseSettings):
     MAX_LLM_USD_PER_DAY: float = 0.0
     MAX_VERIFICATIONS_PER_DAY: int = 0
     MAX_SOURCE_CREDITS_PER_DAY: int = 0
+    OPTIMIZER_MINIMUM_SAMPLE: int = 30
+    OPTIMIZER_OUTCOME_WINDOW_DAYS: int = 14
 
     @field_validator("MAX_LLM_USD_PER_DAY")
     @classmethod

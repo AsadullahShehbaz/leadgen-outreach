@@ -1,6 +1,6 @@
 # Module 13 Plan - React Dashboard and Setup Wizard
 
-Status: planned (2026-11-22).
+Status: implemented (2026-11-22).
 Design reference: `docs/leadgen-system-design-v2.md`, Sections 7, 20-22
 (module 13).
 Acceptance test from the design: **a user can complete a manual walkthrough

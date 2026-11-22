@@ -113,6 +113,8 @@ Module 10 done: Groq-backed LangGraph personalization, Pydantic drafts, factual 
   - Install, update, rollback, encrypted backup, manual restore, and redacted support-bundle scripts are implemented.
   - Packaging tests cover service layout, routes, secret handling, bounded health checks, and script safety.
   - Install, runbook, and backup/restore documentation added under `docs/`.
+- [x] Saved the Module 14 optimizer and weekly report plan:
+  `docs/plan/module-14-optimizer-weekly-report.md`.
 - [x] Created the monorepo structure:
 
 ```
@@ -164,11 +166,11 @@ PROGRESS.md
 | 10 | LangGraph agent | Done (2026-11-21) |
 | 11 | License | Done (2026-11-21) |
 | 12 | Packaging | Not started |
-| 13 | React dashboard + wizard | Not started |
-| 14 | Optimizer + weekly report | Not started |
+| 13 | React dashboard + wizard | Implemented (2026-11-22) |
+| 14 | Optimizer + weekly report | Implemented (2026-11-22) |
 
 ## Next step
-**Module 12 — Packaging**.
+**Live setup — create deployment environment files and database credentials**.
 
 The Module 1 live-database run is still pending and can be done whenever the Supabase
 URLs are ready; it does not block Module 11:
